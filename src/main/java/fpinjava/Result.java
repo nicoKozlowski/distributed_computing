@@ -545,7 +545,7 @@ public abstract class Result<A> implements Serializable {
   public static <A> Result<A> of(final A value) {
     return value != null
         ? success(value)
-        : Result.failure("Null value");
+        : Result.<A>failure("Null value");
   }
 
   public static <A> Result<A> of(final A value, final String message) {
