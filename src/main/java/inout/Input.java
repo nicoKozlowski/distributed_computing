@@ -12,7 +12,8 @@ public interface Input {
     default Result<Tuple<Integer, Input>> readInt(){
         // Ihre Aufgabe
 
-        return null;
+        return readLine().flatMap(tuple1 ->
+                readIntMaybe(tuple1.fst).map(num -> Tuple.tuple(num, tuple1.snd)));
     }
 
     static Result<Integer> readIntMaybe(String s){
@@ -20,11 +21,11 @@ public interface Input {
     }
 
     default Stream<String> readLines() {
-        return Stream.<String,Input>unfold(this, Input::readLine);
+        return Stream.unfold(this, Input::readLine);
     }
 
     default Stream<Integer> readInts() {
-        return Stream.<Integer,Input>unfold(this, Input::readInt);
+        return Stream.unfold(this, Input::readInt);
     }
 
     void shutdownInput();

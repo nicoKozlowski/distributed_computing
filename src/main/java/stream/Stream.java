@@ -1,10 +1,8 @@
 package stream;
 
-import fpinjava.Function;
-import fpinjava.Result;
-import fpinjava.Supplier;
-import fpinjava.TailCall;
+import fpinjava.*;
 import list.List;
+import tuple.Tuple;
 
 import static fpinjava.TailCall.ret;
 import static fpinjava.TailCall.sus;
@@ -13,6 +11,8 @@ import static fpinjava.TailCall.sus;
 public abstract class Stream<A> {
 
     private static Stream EMPTY = new Empty();
+
+
     public abstract A head();
     public abstract Stream<A> tail();
     public abstract Boolean isEmpty();
@@ -24,6 +24,28 @@ public abstract class Stream<A> {
     public abstract Stream<A> drop(int n);
     public abstract Stream<A> takeWhile(Function<A, Boolean> p);
     public abstract Stream<A> dropWhile(Function<A, Boolean> p);
+    public abstract <B> Stream<B> map(Function<A, B> f);
+    public abstract void forEach(Effect<A> ef);
+
+    @SuppressWarnings("unchecked")
+    public static <A> Stream<A> empty() {
+        return EMPTY;
+    }
+
+    public static <A> Stream<A> cons(Supplier<A> hd, Supplier<Stream<A>> tl) {
+        return new Cons<>(hd, tl);
+    }
+
+    public static <A, S> Stream<A> unfold(S z, Function<S, Result<Tuple<A, S>>> f) {
+
+        return f.apply(z)
+                .map(x -> cons(() -> x.fst, () -> unfold(x.snd, f)))
+                .getOrElse(empty());
+    }
+
+    public static Stream<Integer> from(int i) {
+        return unfold(i, x -> Result.success(Tuple.tuple(x, x + 1)));
+    }
 
     //class Empty
     private static class Empty<A> extends Stream<A> {
@@ -72,6 +94,16 @@ public abstract class Stream<A> {
         public Stream<A> dropWhile(Function<A, Boolean> p) {
             return this;
         }
+
+        @Override
+        public <B> Stream<B> map(Function<A, B> f) {
+            return empty();
+        }
+
+        @Override
+        public void forEach(Effect<A> ef) {
+
+        }
     }
 
     //class Cons
@@ -102,19 +134,6 @@ public abstract class Stream<A> {
         @Override
         public Boolean isEmpty() {
             return false;
-        }
-
-        static <A> Stream<A> cons(Supplier<A> hd, Supplier<Stream<A>> tl) {
-            return new Cons<>(hd, tl);
-        }
-
-        @SuppressWarnings("unchecked")
-        public static <A> Stream<A> empty() {
-            return EMPTY;
-        }
-
-        public static Stream<Integer> from(int i) {
-            return iterate(i, x -> x + 1);
         }
 
         @Override
@@ -177,12 +196,32 @@ public abstract class Stream<A> {
 
         public Stream<A> repeat(A a) {
 
-            return iterate(a, x -> x);
+            return iterate(() -> a, x -> x);
         }
 
-        public static <A> Stream<A> iterate(A seed, Function<A, A> f) {
+        public static <A> Stream<A> iterate(Supplier<A> seed, Function<A, A> f) {
 
-            return cons(() -> seed, () -> iterate(f.apply(seed), f));
+            return cons(seed, () -> iterate(() -> f.apply(seed.get()), f));
+        }
+
+        @Override
+        public <B> Stream<B> map(Function<A, B> f) {
+
+            return cons(() -> f.apply(head.get()),
+                        () -> tail.get().map(f));
+        }
+
+        public static Stream<Integer> fibs() {
+
+            return unfold(Tuple.tuple(1, 1),
+                    x -> Result.success(Tuple.tuple(x.fst, Tuple.tuple(x.snd, x.fst + x.snd))));
+        }
+
+        @Override
+        public void forEach(Effect<A> ef) {
+
+            ef.apply(head.get());
+            tail.get().forEach(ef);
         }
     }
 }
