@@ -11,13 +11,13 @@ public class AbstractWriter implements Output {
     }
 
     public void print(String s) {
-        writer.print(s);
+        writer.print(s + "\n");
         writer.flush();
     }
 
     @Override
     public void printLine(String s) {
-        writer.println(s);
+        writer.println(s + "\n");
         writer.flush();
     }
 
