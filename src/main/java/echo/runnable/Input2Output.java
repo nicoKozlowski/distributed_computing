@@ -7,8 +7,8 @@ import fpinjava.Result;
 
 public class Input2Output implements Input, Output {
 
-    private Input in;
-    private Output out;
+    private final Input in;
+    private final Output out;
 
     public Input2Output(Input in, Output out) {
         this.in = in;
@@ -17,14 +17,12 @@ public class Input2Output implements Input, Output {
 
     static Runnable input2output(Input in, Output out) {
 
-        return () -> {
-            in.readLine().<Runnable>map(tuple -> () -> {
-                        out.print(tuple.fst);
+        return in.readLine().<Runnable>map(tuple -> () -> {
+                        out.printLine(tuple.fst);
                         input2output(tuple.snd, out).run();
                     })
-                    .getOrElse(out::shutdownOutput)
-                    .run();
-        };
+                    .getOrElse(out::shutdownOutput);
+
     }
 
     public Result<Tuple<String, Input>> readLine() {

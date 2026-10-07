@@ -8,12 +8,12 @@ public class ScriptReader implements Input {
 
     private final List<String> lines;
 
-    public ScriptReader(List<String> commands) {
-        this.lines = commands;
+    public ScriptReader(List<String> lines) {
+        this.lines = lines;
     }
 
-    public ScriptReader(String... commands) {
-        this.lines = List.list(String.join("\n", commands).split("\n"));
+    public ScriptReader(String... lines) {
+        this.lines = List.list(String.join("\n", lines).split("\n"));
     }
 
     public Result<Tuple<String, Input>> readLine() {

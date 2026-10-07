@@ -23,7 +23,7 @@ public class ScriptWriter implements Output {
 
         return output.length() == 0
                 ? List.list()
-                : List.list(output.toString().split("\n", -1));
+                : List.list(output.toString().split("\n"));
     }
 
     public void shutdownOutput() {
