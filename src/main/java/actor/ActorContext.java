@@ -1,4 +1,8 @@
 package actor;
 
-public class ActorContext<T> {
+public interface ActorContext<T> {
+
+    void become(MessageProcessor<T> behavior);
+
+    MessageProcessor<T> getBehavior();
 }
