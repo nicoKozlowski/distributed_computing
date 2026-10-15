@@ -88,3 +88,30 @@ Genau aus diesem Grund wird der Main Thread blockiert und muss warten, sodass da
 Erst wenn das Spiel komplett durchgeführt wird, gibt der Referee den Permit mit .release() wieder frei. Dadurch kann der Main
 Thread sich erst sauber beenden. Der Semaphor hält somit den Main Thread solange am laufen, bis das Spiel beendet wird.
 ___
+
+# Ping-Pong ohne Semaphor:
+___
+Führt man das Ping-Pong-Beispiel ohne Semaphor aus, so lässt sich beobachten, dass das Spiel gar nicht erst beginnt, somit
+auch nicht zuende geführt wird. das Programm terminiert direkt mit "Process finished with exit code 0". Das bedeutet,
+dass das Programm zwar erfolgreich terminiert wird, allerdings das Spiel vollständig ignoriert wird. wie s.o. schon bei Semaphor
+erwähnt, liegt dass daran, dass ohne Semaphor der Main-User-Thread nicht aktiv gehalten wird. Da dieser keine wirkliche Aufgabe
+besitzt, sondern nur dazu dient, das Spiel über einen seperaten Threadpool am laufen zu halten, beendet das Programm direkt,
+da die JVM das Spiel im Hintergrund laufen lässt solange der Main Thread läuft. Terminiert dieser User Thread direkt, so werden
+die Hintergrund Threads direkt mitgeschlossen.
+___
+
+# Ping-Pong als User-Thread
+___
+Da die JVM erst terminiert, wenn keine User-Threads mehr aktiv sind, läuft das Programm weiter, da bei dem Actor Framework 
+der Threadpool des ExecutorService signalisiert bekommt, dass es sich um einen User-Thread handelt, wird die JVM am laufen gehalten.
+Die Work Threads werden also wie User-Threads behandelt und warten auf die nächste Aufgabe. der Threadpool des ExecutorService 
+beendet sich also nicht automatisch, dieser muss bei User-Threads manuell mit .shutdown() beendet werden.
+___
+
+# Main Thread zum schlafen bringen
+___
+bringt man den Main Thread zum schlafen, gibt man den Daemon-Threads zeit, das spiel zueende zu bringen. Es geschiet genau
+das "am laufen halten" wie mit semaphor. der Main-User-Thread ist während das Spiel im Hintergrund läuft noch aktiv und somit
+wird die JVM nicht beendet, das Spiel kann bis zum Schluss durchgeführt werden und wenn der Main-Thread wieder aufwacht
+ist seine Aufgabe erledigt und terminiert das Programm.
+___
