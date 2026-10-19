@@ -47,7 +47,6 @@ public class Main {
         semaphore.acquire();
         player1.tell(1, Result.success(player2));
         semaphore.acquire();
-
     }
 }
 
